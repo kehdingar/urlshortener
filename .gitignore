@@ -1,0 +1,4 @@
+venvURLShortner/
+.env
+.dockerignore
+**/__pycache__/
