@@ -1,0 +1,72 @@
+version: '3'
+
+services:
+  nginx:
+    container_name: Nginx
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - shared-volume:/usr/share/nginx/html
+    ports:
+      - 80:80
+    restart: always
+
+    depends_on:
+      - app
+    networks:
+      - url_shortener_network
+
+  app:
+    container_name: URLShortener
+    restart: always
+    build: ./backend
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    tty: true
+    depends_on:
+      - postgres
+    environment:
+      - APP_ENV=production
+      - DATABASE_URL=${APP_DATABASE_URL}
+    networks:
+      - url_shortener_network
+
+  postgres:
+    container_name: Postgres
+    image: postgres:15
+    env_file: 
+      - ./backend/.env
+    restart: always
+    ports:
+      - '5432:5432'
+    volumes:
+      - data:/var/lib/postgresql/data:cached
+    networks:
+      - url_shortener_network
+
+  pgadmin:
+    container_name: PostgresAdmin
+    image: dpage/pgadmin4
+    env_file: 
+      - ./backend/.env    
+    command: python connect_pgadmin.py
+    ports:
+      - 5050:80
+    depends_on:
+      - postgres
+    volumes:
+      - pgdata:/var/lib/pgadmin
+
+    networks:
+      - url_shortener_network
+
+volumes:
+  data:
+  shared-volume:
+  pgdata:
+
+networks:
+  url_shortener_network:
+    driver: bridge
