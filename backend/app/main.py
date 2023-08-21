@@ -1,8 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.models import url
+
+from app.database.config import engine
+
+from app.api import shortener
+
+
+
 app = FastAPI(root_path="/api/v1")
 
+url.Base.metadata.create_all(bind=engine)
 
 origins = [
     "http://localhost:80",
@@ -27,5 +36,6 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the FastAPI URL Shortener application!"}
+    return {"message": "Welcome to the FastAPI application!"}
 
+app.include_router(shortener.router, prefix="/shortener", tags=["shortener"])
