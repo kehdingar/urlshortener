@@ -2,3 +2,5 @@ venvURLShortner/
 .env
 .dockerignore
 **/__pycache__/
+**/migrations/versions/*
+**.pytest_cache/
