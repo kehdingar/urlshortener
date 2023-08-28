@@ -1,6 +1,13 @@
 from fastapi import HTTPException
 from pydantic import BaseModel, field_validator
 from urllib.parse import urlparse
+from enum import Enum
+
+
+class TaskStatus(str, Enum):
+    completed = "completed"
+    pending = "pending"
+
 
 # url base
 class URLBase(BaseModel):
@@ -25,8 +32,11 @@ class URLCreate(URLBase):
     pass
 
 # returning a URL after post
-class URLReturn(URLBase):
+class URLReturn(BaseModel):
+    full_url: str
     short_url: str
+    status: TaskStatus
+
 
 class GetUrlRequest(URLBase):
     pass

@@ -10,5 +10,8 @@ else
     alembic upgrade head
 fi
 
+celery -A tasks worker -l info &
+celery -A tasks beat -l info &
+
 # Start the app
 exec "$@"

@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 
 services:
   nginx:
@@ -16,6 +16,14 @@ services:
     networks:
       - url_shortener_network
 
+  redis:
+    image: redis:5.0.5-alpine
+    container_name: "redis"
+    ports:
+      - 6379:6379
+    networks:
+      - url_shortener_network      
+
   app:
     container_name: URLShortener
     restart: always
@@ -27,9 +35,7 @@ services:
     tty: true
     depends_on:
       - postgres
-    environment:
-      - APP_ENV=production
-      - DATABASE_URL=${APP_DATABASE_URL}
+      - redis
     networks:
       - url_shortener_network
 
@@ -58,7 +64,6 @@ services:
       - postgres
     volumes:
       - pgdata:/var/lib/pgadmin
-
     networks:
       - url_shortener_network
 
