@@ -50,3 +50,18 @@ def test_get_task_result(test_client):
     assert response.json()['status'] == "completed"
     assert response.json()['status'] != ""
     assert response.json()['status'] != ""
+
+def test_get_task_result_pending(test_client):
+    # Test getting task result for a pending task
+    url_create_data = {"full_url": "http://example2.com"}
+    response = test_client.post("/api/v1/shortener", json=url_create_data)
+    print(f"\n\n\n TESTING {response.json()}")
+    task_id = response.json()["task_id"]
+
+    # Task is still pending
+    response = test_client.get(f"/api/v1/shortener/task/{task_id}")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "pending"
+    assert data["full_url"] == ""
+    assert data["short_url"] == ""
