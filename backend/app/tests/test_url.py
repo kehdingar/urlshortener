@@ -1,13 +1,14 @@
-
-
 import time
+from app.models.url import URL
+import urllib.parse
+
 
 
 def test_create_url(test_client, test_db):
     # Create a URL using the test client
     response = test_client.post(
         "/api/v1/shortener",
-        json={"full_url": "https://www.example.com"},
+        json={"full_url": "http://example.com"},
     )
 
     # Assert that the response has a successful status code
@@ -73,3 +74,18 @@ def test_duplicate(test_client):
     # Task is still pending
     assert 'Duplicate data' in response.json()['detail']['state']
     assert 'short_url' in response.json()['detail']
+
+
+def test_get_url(test_client, test_db):
+    # Create a URL in the database to retrieve
+    session = test_db()
+    url = session.query(URL).filter(URL.full_url == 'http://example.com').first()
+
+    # Send a GET request to retrieve the URL by its short URL
+    response = test_client.get(f"/api/v1/shortener/short_url/{url.short_url}")
+
+    data = response.json()
+    assert response.status_code == 200
+    assert "full_url" in data
+    assert data["full_url"] == "http://example.com"
+
