@@ -67,10 +67,37 @@ services:
     networks:
       - url_shortener_network
 
+  prometheus:
+    image: prom/prometheus:v2.30.3  
+    volumes:
+      - ./backend/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - app
+    networks:
+      - url_shortener_network
+
+  grafana:
+    image: grafana/grafana:8.1.5
+    volumes:
+      - ./backend/grafana/grafana.ini:/etc/grafana/grafana.ini
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - url_shortener_network
+
+
 volumes:
   data:
   shared-volume:
   pgdata:
+  prometheus_data:
+  grafana_data:    
 
 networks:
   url_shortener_network:
