@@ -13,6 +13,7 @@ services:
 
     depends_on:
       - app
+      - frontend      
     networks:
       - url_shortener_network
 
@@ -91,6 +92,18 @@ services:
     networks:
       - url_shortener_network
 
+  frontend:
+    container_name: React
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    stdin_open: true
+    volumes:
+      - './frontend:/app:cached'
+      - './frontend/node_modules:/app/node_modules:cached'
+      - 'shared-volume:/app/build'      
+    networks:
+      - url_shortener_network
 
 volumes:
   data:
