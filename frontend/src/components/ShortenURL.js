@@ -19,17 +19,12 @@ const ShortenURL = () => {
     } catch (error) {      
       if (error.response && error.response.status === 400) {
         setErrorMessage(error.response.data.detail);
-        console.log(error.response)
-        console.log(error)
       } else {
         setErrorMessage('An error occurred. Please try again later.');
-        console.log(error)
       }
     }
 
     setIsLoading(false);
-    console.log("The RESPONSE Check.......")
-    console.log(shortUrl)
   };
 
   return (

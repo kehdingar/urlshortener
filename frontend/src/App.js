@@ -6,8 +6,6 @@ import URLShortener from './components/URLShortener'
 function App() {
   return (
     <>
-      {/* <CheckURL /> */}
-      {/* <ShortenURL /> */}
       <URLShortener/>
     </>
   );
