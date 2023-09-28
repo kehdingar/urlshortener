@@ -21,12 +21,12 @@ def test_create_url(test_client, test_db):
 def test_missing_scheme(test_client):
     response = test_client.post("/api/v1/shortener", json={"full_url": "missing_scheme_url"})
     assert response.status_code == 422
-    assert response.json() == {'detail': 'URL must have a valid scheme (http/https)'}
+    assert response.json()['detail']['error'] == 'URL must have a valid scheme (http/https)'
 
 def test_no_domain(test_client):
     response = test_client.post("/api/v1/shortener", json={"full_url": "https://www"})
     assert response.status_code == 422
-    assert response.json() == {'detail': 'Invalid URL format: missing dot in domain'}
+    assert response.json()['detail']['error']  == 'Invalid URL format: missing dot in domain'
 
 
 def test_get_task_result(test_client):
@@ -56,7 +56,6 @@ def test_get_task_result_pending(test_client):
     # Test getting task result for a pending task
     url_create_data = {"full_url": "http://example2.com"}
     response = test_client.post("/api/v1/shortener", json=url_create_data)
-    print(f"\n\n\n TESTING {response.json()}")
     task_id = response.json()["task_id"]
 
     # Task is still pending
@@ -72,7 +71,7 @@ def test_duplicate(test_client):
     url_create_data = {"full_url": "http://example.com"}
     response = test_client.post("/api/v1/shortener", json=url_create_data)
     # Task is still pending
-    assert 'Duplicate data' in response.json()['detail']['state']
+    assert 'URL already exists' in response.json()['detail']['error']
     assert 'short_url' in response.json()['detail']
 
 
@@ -88,4 +87,3 @@ def test_get_url(test_client, test_db):
     assert response.status_code == 200
     assert "full_url" in data
     assert data["full_url"] == "http://example.com"
-
