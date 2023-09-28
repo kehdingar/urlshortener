@@ -1,4 +1,5 @@
-from fastapi import APIRouter,Depends
+import time
+from fastapi import APIRouter,Depends,status
 from app.schemas.url import URLCreate, URLReturn, TaskStatus, GetUrlRequest
 from starlette.exceptions import HTTPException
 from sqlalchemy.orm import Session
@@ -20,7 +21,7 @@ async def create_url(url: URLCreate, db: Session = Depends(get_db)):
     # Check if the URL already exists in the database
     db_url = db.query(URL).filter(URL.full_url == url.full_url).first()
     if db_url:
-        raise HTTPException(status_code=400, detail={'state':'Duplicate data','short_url': db_url.short_url})
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail={'error': 'URL already exists', 'short_url': db_url.short_url})
     
     # Convert the URLCreate instance to a dictionary since pydantic models are
     # not directly serializable to JSON.
@@ -39,6 +40,7 @@ async def get_task_result(task_id: str,db: Session = Depends(get_db)):
 
     if task_result.ready():
         # If the task is completed, return the result
+
         result = task_result.result
         db_url = URL(full_url=result['full_url'], short_url=result['short_url'])
         db.add(db_url)

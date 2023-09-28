@@ -1,12 +1,51 @@
-import React, { useState } from 'react';
-import axios from '../api/axios'
+import React, { useState, useEffect } from 'react';
+import axios from '../api/axios';
 
 const ShortenURL = () => {
   const [longUrl, setLongUrl] = useState('');
   const [shortUrl, setShortUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [task_id, setTaskId] = useState(null); // Assuming task_id is stored in state
 
+  useEffect(() => {
+    let pollCount = 0;
+    const maxPollCount = 20; // Maximum poll count, each poll will be 2 seconds, so 20 polls will make 40 seconds.
+
+    const pollTaskStatus = async () => {
+      try {
+        const response = await axios.get('/task/' + task_id);
+        if (response.data.status === 'completed') {
+          setIsLoading(false);
+          setShortUrl(response.data.short_url);
+        } else if (pollCount < maxPollCount) {
+          pollCount++;
+          setTimeout(pollTaskStatus, 2000); // Poll every 2 seconds
+        } else {
+          setErrorMessage('Timed out, please retry again');
+        }
+      } catch (error) {
+        setErrorMessage('An error occurred while polling');
+      }
+    };
+
+    if (task_id) {
+      pollTaskStatus();
+    }
+
+    return () => {
+      // Clean up function to clear any pending timeouts if the component unmounts
+      clearTimeout(pollTaskStatus);
+    };
+  }, [task_id]); // Dependency array to run the effect when task_id changes
+
+  const handleResponse = (response) => {
+    if (response.status === 'completed') {
+      setShortUrl(response.short_url);
+    }else {
+      setTaskId(response.task_id);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,17 +53,22 @@ const ShortenURL = () => {
     setErrorMessage('');
 
     try {
-      const response = await axios.post('/urls', { full_url: longUrl });
-      setShortUrl(response.data.short_url);
-    } catch (error) {      
-      if (error.response && error.response.status === 400) {
-        setErrorMessage(error.response.data.detail);
-      } else {
+      const response = await axios.post('/', { full_url: longUrl });
+      handleResponse(response.data);
+    } catch (error) {
+      if (error.response.status === 409) {
+        setShortUrl(error.response.data.detail.short_url);
+        setIsLoading(false);
+        setErrorMessage(error.response.data.detail.error);
+      } else if(error.response.status !== 500){
+        setErrorMessage(error.response.data.detail.error);
+        setIsLoading(false);
+      }else {
         setErrorMessage('An error occurred. Please try again later.');
+        setIsLoading(false);
       }
     }
 
-    setIsLoading(false);
   };
 
   return (
