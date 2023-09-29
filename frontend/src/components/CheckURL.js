@@ -11,12 +11,12 @@ const CheckURL = () => {
     setIsLoading(true);
     setErrorMessage('');
     try {
-      const response = await axios.get(`/short_url/${shortUrl}`);
+      const response = await axios.get('/short_url/' + shortUrl);
       setLongUrl(response.data.full_url);
 
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        setErrorMessage('URL not found.');
+      if (error.response.status !== 500) {
+        setErrorMessage(error.response.data.detail.error);
       } else {
         setErrorMessage('An error occurred. Please try again later.');
       }
