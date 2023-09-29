@@ -11,6 +11,8 @@ from app.api.celery_utils import celery
 from celery.result import AsyncResult
 import urllib.parse
 
+from app.utils import validate_url_format
+
 
 router = APIRouter()
 
@@ -57,12 +59,12 @@ async def get_task_result(task_id: str,db: Session = Depends(get_db)):
 def get_url(short_url: str,db: Session = Depends(get_db)):
 
     short_url = urllib.parse.unquote(short_url)
-
+    validate_url_format(short_url)
     db_url = db.query(URL).filter(URL.short_url == short_url).first()  
 
     print(db_url)
     # If the URL is not found, raise an HTTPException
     if db_url is None:
-        raise HTTPException(status_code=404, detail="URL not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={'error': "URL not found"})
 
     return GetUrlRequest(full_url=db_url.full_url)

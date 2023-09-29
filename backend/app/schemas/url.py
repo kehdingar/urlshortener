@@ -2,6 +2,7 @@ from fastapi import HTTPException
 from pydantic import BaseModel, field_validator
 from urllib.parse import urlparse
 from enum import Enum
+from app.utils import validate_url_format
 
 
 class TaskStatus(str, Enum):
@@ -14,17 +15,8 @@ class URLBase(BaseModel):
 
     @field_validator("full_url")
     def validate_url(cls, v):
-        try:
-            parsed_url = urlparse(v)
-            # Check if the scheme is valid
-            if parsed_url.scheme not in ("http", "https"):
-                raise HTTPException(status_code=422, detail={'error': "URL must have a valid scheme (http/https)"})
-            # Check if the domain contains a dot (.)
-            if "." not in parsed_url.netloc:
-                raise HTTPException(status_code=422, detail={'error': "Invalid URL format: missing dot in domain"})
-        except ValueError as e:
-            raise HTTPException(status_code=422, detail={'error': "Invalid URL format"}) from e
-        return v
+        validate_url_format(v)
+        return v        
 
 # creating a URL
 class URLCreate(URLBase):
