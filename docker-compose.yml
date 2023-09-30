@@ -47,7 +47,7 @@ services:
       - ./backend/.env
     restart: always
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - data:/var/lib/postgresql/data:cached
     networks:
@@ -60,7 +60,7 @@ services:
       - ./backend/.env    
     command: python connect_pgadmin.py
     ports:
-      - 5050:5050
+      - "5050:80"
     depends_on:
       - postgres
     volumes:
