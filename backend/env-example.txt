@@ -1,0 +1,8 @@
+APP_DATABASE_URL=postgresql://postgres:password@postgres:5432/url_shortener
+CELERY_BROKER_URL=redis://redis:6379/0
+CELERY_RESULT_BACKEND=redis://redis:6379/0
+PGADMIN_EMAIL=[pgadmin email]
+PGADMIN_PASSWORD=[pgadmin password]
+POSTGRES_USER=[postgres username]
+POSTGRES_PASSWORD=[postgres password]
+POSTGRES_DB=url_shortener
